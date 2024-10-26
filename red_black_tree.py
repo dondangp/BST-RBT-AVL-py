@@ -8,13 +8,14 @@ class Node:
 
 class RedBlackTree:
     def __init__(self):
-        self.NIL = Node(0)
+        self.NIL = Node(0, 0)  # NIL nodes are black
         self.root = self.NIL
 
     def insert(self, key):
         node = Node(key)
         node.left = self.NIL
         node.right = self.NIL
+        node.color = 1  # New nodes are red
 
         parent = None
         current = self.root
@@ -34,12 +35,25 @@ class RedBlackTree:
         else:
             parent.right = node
 
-        node.color = 1  # New node must be red
         self.fix_insert(node)
 
     def fix_insert(self, node):
         while node != self.root and node.parent.color == 1:
-            if node.parent == node.parent.parent.right:
+            if node.parent == node.parent.parent.left:
+                uncle = node.parent.parent.right
+                if uncle.color == 1:
+                    uncle.color = 0
+                    node.parent.color = 0
+                    node.parent.parent.color = 1
+                    node = node.parent.parent
+                else:
+                    if node == node.parent.right:
+                        node = node.parent
+                        self.left_rotate(node)
+                    node.parent.color = 0
+                    node.parent.parent.color = 1
+                    self.right_rotate(node.parent.parent)
+            else:
                 uncle = node.parent.parent.left
                 if uncle.color == 1:
                     uncle.color = 0
@@ -53,10 +67,6 @@ class RedBlackTree:
                     node.parent.color = 0
                     node.parent.parent.color = 1
                     self.left_rotate(node.parent.parent)
-            else:
-                # Mirror image of above code
-                pass
-
         self.root.color = 0
 
     def left_rotate(self, x):
@@ -90,13 +100,15 @@ class RedBlackTree:
         x.parent = y
 
     def inorder(self):
-        self._inorder(self.root)
+        result = []
+        self._inorder(self.root, result)
+        print(" ".join(map(str, result)))
 
-    def _inorder(self, node):
+    def _inorder(self, node, result):
         if node != self.NIL:
-            self._inorder(node.left)
-            print(node.data, end=' ')
-            self._inorder(node.right)
+            self._inorder(node.left, result)
+            result.append(node.data)
+            self._inorder(node.right, result)
 
 # Test
 rbt = RedBlackTree()
